@@ -8,3 +8,5 @@ deps/notcurses
 /src/swig/notcurses_wrap.c
 /src/java/com/dundalek/notcurses/swig/*.java
 /pom.xml
+.idea
+/*.iml

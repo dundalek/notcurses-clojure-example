@@ -5,4 +5,5 @@ swig \
   -o src/swig/notcurses_wrap.c \
   -package com.dundalek.notcurses.swig \
   -Ideps/notcurses/include \
+  -DSWIGWORDSIZE64 \
   -java src/swig/notcurses.i

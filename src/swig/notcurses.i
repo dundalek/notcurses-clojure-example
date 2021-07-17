@@ -20,4 +20,5 @@
 
 /* SWIG for the truly lazy */
 /* Parse the header file to generate wrappers */
+%include <stdint.i>
 %include "notcurses/notcurses.h"
