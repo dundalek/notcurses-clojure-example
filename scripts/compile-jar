@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+jar=${1:-target/demo.jar}
+
+classes=target/classes
+
+rm -rf "$classes"
+mkdir -p "$classes"
+javac -d "$classes" src/java/com/dundalek/notcurses/swig/*.java
+javac -d "$classes" src/java/cz/adamh/utils/NativeUtils.java
+clojure -Spom
+clojure -M:native:depstar -m hf.depstar.uberjar --compile -m demo.main "$jar" # --verbose

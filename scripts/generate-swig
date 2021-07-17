@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+swig \
+  -outdir src/java/com/dundalek/notcurses/swig \
+  -o src/swig/notcurses_wrap.c \
+  -package com.dundalek.notcurses.swig \
+  -Ideps/notcurses/include \
+  -java src/swig/notcurses.i

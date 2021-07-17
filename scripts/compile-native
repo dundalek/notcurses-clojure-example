@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NATIVE_IMAGE=`which native-image` || true
+
+if [ -z "$NATIVE_IMAGE" ]; then
+  if [ -z "$GRAALVM_HOME" ]; then
+      echo "Please set GRAALVM_HOME"
+      exit 1
+  fi
+
+  NATIVE_IMAGE="$GRAALVM_HOME/bin/native-image"
+
+  if [ ! -x "$NATIVE_IMAGE" ]; then
+    "$GRAALVM_HOME/bin/gu" install native-image || true
+  fi
+fi
+
+jar=${1:-target/demo.jar}
+
+case "$OSTYPE" in
+  linux*)   NATIVE_RESOURCES=".*libnotcurses-jni.so" ;;
+  darwin*)  NATIVE_RESOURCES=".*libnotcurses-jni.dylib" ;;
+  *)        NATIVE_RESOURCES=".*libnotcurses-jni.*" ;;
+esac
+
+"$NATIVE_IMAGE" \
+  -jar "$jar" \
+  -H:Name=target/demo \
+  -H:+ReportExceptionStackTraces \
+  -J-Dclojure.spec.skip-macros=true \
+  -J-Dclojure.compiler.direct-linking=true \
+  -H:IncludeResources="$NATIVE_RESOURCES" \
+  --initialize-at-build-time \
+  -H:Log=registerResource: \
+  -H:+JNI \
+  --verbose \
+  --no-fallback \
+  --no-server \
+  --report-unsupported-elements-at-runtime \
+  -J-Xmx6g \
+  --initialize-at-run-time=com.dundalek.notcurses.swig.NCConstants
+  # -H:+PrintClassInitialization \

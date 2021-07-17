@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -xeuo pipefail
+
+scripts/clean
+scripts/generate-swig
+scripts/compile-zig
+scripts/compile-jar
+scripts/compile-native
