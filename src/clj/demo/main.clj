@@ -32,17 +32,17 @@
 (defn ncchannel_set [channel rgb]
   (if (> channel 0xffffff)
     (throw (IllegalArgumentException.))
-    (bit-or (bit-and-not channel (.intValueExact NCConstants/NC_BG_RGB_MASK))
-            (.intValueExact NCConstants/NC_BGDEFAULT_MASK)
+    (bit-or (bit-and-not channel NCConstants/NC_BG_RGB_MASK)
+            NCConstants/NC_BGDEFAULT_MASK
             rgb)))
 
 (defn ncchannel_set_alpha [channel alpha]
-  (if-not (zero? (bit-and-not alpha (.intValueExact NCConstants/NC_BG_ALPHA_MASK)))
+  (if-not (zero? (bit-and-not alpha NCConstants/NC_BG_ALPHA_MASK))
     (throw (IllegalArgumentException.))
     (bit-or alpha
-            (bit-and-not channel (.intValueExact NCConstants/NC_BG_ALPHA_MASK))
-            (if (not= alpha (.intValueExact NCConstants/NCALPHA_OPAQUE))
-              (.intValueExact NC/NC_BGDEFAULT_MASK)
+            (bit-and-not channel NCConstants/NC_BG_ALPHA_MASK)
+            (if (not= alpha NCConstants/NCALPHA_OPAQUE)
+              NC/NC_BGDEFAULT_MASK
               0))))
 
 (defn ncchannels_set_fchannel [channels channel]
@@ -64,7 +64,7 @@
     (ncchannels_set_bchannel channels channel)))
 
 (defn ncchannels_set_bg_alpha [channels alpha]
-  (if (= alpha (.intValueExact NCConstants/NCALPHA_HIGHCONTRAST)) ; forbidden for background alpha
+  (if (= alpha NCConstants/NCALPHA_HIGHCONTRAST) ; forbidden for background alpha
     (throw (IllegalArgumentException.))
     (let [channel (-> (NC/ncchannels_bchannel channels)
                       (ncchannel_set_alpha alpha))]
@@ -77,8 +77,8 @@
         c (bit-or (bit-shift-left r 16)
                   (bit-shift-left g 8)
                   b)]
-    (bit-or (bit-and-not channel (.intValueExact NCConstants/NC_BG_RGB_MASK))
-            (.intValueExact NCConstants/NC_BGDEFAULT_MASK)
+    (bit-or (bit-and-not channel NCConstants/NC_BG_RGB_MASK)
+            NCConstants/NC_BGDEFAULT_MASK
             c)))
 
 (defn- linear_transition [start end duration diff]
@@ -174,10 +174,10 @@
 
 (defn- draw_boxes_gradients [planes]
   (doseq [[plane color] (map list planes box_colors)]
-    (let [ur (bit-or 0xffffff (.intValueExact NCConstants/NC_BGDEFAULT_MASK))
-          ul (bit-or color (.intValueExact NCConstants/NC_BGDEFAULT_MASK))
-          lr (bit-or color (.intValueExact NCConstants/NC_BGDEFAULT_MASK))
-          ll (bit-or 0x000000 (.intValueExact NCConstants/NC_BGDEFAULT_MASK))]
+    (let [ur (bit-or 0xffffff NCConstants/NC_BGDEFAULT_MASK)
+          ul (bit-or color NCConstants/NC_BGDEFAULT_MASK)
+          lr (bit-or color NCConstants/NC_BGDEFAULT_MASK)
+          ll (bit-or 0x000000 NCConstants/NC_BGDEFAULT_MASK)]
       (nc-err (NC/ncplane_highgradient plane ul ur ll lr (dec (NC/ncplane_dim_y plane)) (dec (NC/ncplane_dim_x plane)))))))
 
 (defn- draw_boxes_bordered [planes]
@@ -209,7 +209,7 @@
         plane (NC/ncplane_create parent opts)
         chans (-> 0
                   (ncchannels_set_bg_rgb 0x000000)
-                  (ncchannels_set_bg_alpha (.intValueExact NCConstants/NCALPHA_BLEND)))
+                  (ncchannels_set_bg_alpha NCConstants/NCALPHA_BLEND))
         _ (nc-err (NC/ncplane_set_base plane " " 0 chans))
         border_chans (ncchannels_set_fg_rgb 0 c_red)]
 
@@ -249,7 +249,7 @@
   (NativeUtils/loadLibraryFromJar (str "/" (System/mapLibraryName "notcurses-jni")))
 
   (let [opts (doto (notcurses_options.)
-               #_(.setFlags (.longValueExact NCConstants/NCOPTION_SUPPRESS_BANNERS))
+               #_(.setFlags NCConstants/NCOPTION_SUPPRESS_BANNERS)
                #_(.setLoglevel ncloglevel_e/NCLOGLEVEL_ERROR))
         ncs (NC/notcurses_core_init opts nil)
         plane (NC/notcurses_stdplane ncs)
@@ -296,10 +296,10 @@
     (run_serial_transition ncs 150e6
       (fn render [i diff duration]
         (let [plane (get box_planes i)
-              ur (bit-or (transition_rgb (get box_colors i) 0xffffff duration diff) (.intValueExact NCConstants/NC_BGDEFAULT_MASK))
-              ul (bit-or (get box_colors i) (.intValueExact NCConstants/NC_BGDEFAULT_MASK))
-              lr (bit-or (get box_colors i) (.intValueExact NCConstants/NC_BGDEFAULT_MASK))
-              ll (bit-or (transition_rgb (get box_colors i) 0x000000 duration diff) (.intValueExact NCConstants/NC_BGDEFAULT_MASK))]
+              ur (bit-or (transition_rgb (get box_colors i) 0xffffff duration diff) NCConstants/NC_BGDEFAULT_MASK)
+              ul (bit-or (get box_colors i) NCConstants/NC_BGDEFAULT_MASK)
+              lr (bit-or (get box_colors i) NCConstants/NC_BGDEFAULT_MASK)
+              ll (bit-or (transition_rgb (get box_colors i) 0x000000 duration diff) NCConstants/NC_BGDEFAULT_MASK)]
           (nc-err (NC/ncplane_highgradient plane ul ur ll lr (dec (NC/ncplane_dim_y plane)) (dec (NC/ncplane_dim_x plane)))))))
 
     (let [message_box (make_message_box plane dimy dimx)]
@@ -309,9 +309,10 @@
           (let [x (linear_transition from to duration diff)]
             (nc-err (NC/ncplane_move_yx message_box (NC/ncplane_y message_box) x))))))
 
-    ;;(NC/notcurses_getc_blocking ncs nil)
     ;;(draw_boxes_gradients box_planes)
     ;;(nc-err (NC/notcurses_render ncs))
+    ;;(NC/notcurses_getc_blocking ncs nil)
+    ;;(Thread/sleep 1000)
 
     (let [duration 1000e6]
       (loop [iter 0
@@ -324,7 +325,7 @@
                           (get box_colors i)
                           0x000000]
                   corners (vec (for [j (range 4)]
-                                 (bit-or (.intValueExact NCConstants/NC_BGDEFAULT_MASK)
+                                 (bit-or NCConstants/NC_BGDEFAULT_MASK
                                          (transition_rgb (get colors (mod (+ iter j) 4))
                                                          (get colors (mod (+ j iter 1) 4))
                                                          duration

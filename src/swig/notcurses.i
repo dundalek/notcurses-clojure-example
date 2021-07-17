@@ -18,6 +18,10 @@
 %ignore ncplane_vprintf_stained;
 %ignore ncplane_vprintf_yx;
 
+// Include constants in Java source, because loading them via JNI bridge confuses Graal.
+// There is also some light post-processing with sed, see scripts/generate-swig.
+%javaconst(1);
+
 /* SWIG for the truly lazy */
 /* Parse the header file to generate wrappers */
 %include <stdint.i>

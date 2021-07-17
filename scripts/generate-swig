@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
 
+OUTDIR="src/java/com/dundalek/notcurses/swig"
+
 swig \
-  -outdir src/java/com/dundalek/notcurses/swig \
+  -outdir "$OUTDIR" \
   -o src/swig/notcurses_wrap.c \
   -package com.dundalek.notcurses.swig \
   -Ideps/notcurses/include \
   -DSWIGWORDSIZE64 \
   -java src/swig/notcurses.i
+
+# Unsigned suffix is not needed
+STRIP_UNSIGNED='s/u;/;/g;s/u)/)/g'
+# SWIG tries to be safe and treats long longs as BigInteger,
+# but the constants defined by notcurses fit in Java long
+REPLACE_BIG_INTEGER='s/java.math.BigInteger/long/g'
+# Use the L suffix for longs
+STRIP_LONG_LONG='s/ull/L/g'
+
+sed -i "${STRIP_UNSIGNED};${REPLACE_BIG_INTEGER};${STRIP_LONG_LONG}" "${OUTDIR}/NCConstants.java"

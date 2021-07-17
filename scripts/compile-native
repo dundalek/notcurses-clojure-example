@@ -39,6 +39,6 @@ esac
   --no-fallback \
   --no-server \
   --report-unsupported-elements-at-runtime \
-  -J-Xmx6g \
-  --initialize-at-run-time=com.dundalek.notcurses.swig.NCConstants
+  -J-Xmx6g
+  # -H:GenerateDebugInfo=1 \
   # -H:+PrintClassInitialization \
