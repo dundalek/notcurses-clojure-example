@@ -11,11 +11,14 @@ stdenv.mkDerivation {
     swig4
     which
 
-    # notcurses dependencies
+    # notcurses tool dependencies
+    cmake
+    pkg-config
+    # notcurses lib dependencies
     libunistring
     ncurses
     qrcodegen
-    readline
+    readline81
     zlib
   ];
 }

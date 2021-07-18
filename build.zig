@@ -45,7 +45,7 @@ pub fn build(b: *Builder) !void {
         notcurses_source_path ++ "/src/lib/metric.c",
         notcurses_source_path ++ "/src/lib/notcurses.c",
         notcurses_source_path ++ "/src/lib/plot.c",
-        notcurses_source_path ++ "/src/lib/png.c",
+        // notcurses_source_path ++ "/src/lib/png.c",
         notcurses_source_path ++ "/src/lib/progbar.c",
         notcurses_source_path ++ "/src/lib/reader.c",
         notcurses_source_path ++ "/src/lib/reel.c",
