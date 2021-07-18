@@ -3,7 +3,7 @@
 
 [Notcurses](https://notcurses.com/) is a moderm library for building terminal UIs with advanced graphics support. This is a demo showing how to use it with [Clojure](https://clojure.org/).
 
-Bindings are generated with [SWIG](http://swig.org/) and compiled using [Zig](https://ziglang.org/learn/why_zig_rust_d_cpp/#tooling) (any C compiler could be used, but I find Zig easiest to use because it includes simple and powerful build system instead of relying on additional complex tools). [GraalVM](https://www.graalvm.org/) native-image is used to compile it to a binary executable.
+Bindings are generated with [SWIG](http://swig.org/) and compiled using [Zig](https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html) (any C compiler could be used, but I find Zig easiest to use because it includes powerful yet simple build system instead of relying on additional complex tools). [GraalVM](https://www.graalvm.org/) native-image is used to compile it to a binary executable.
 
 ![Notcurses demo](https://user-images.githubusercontent.com/755611/114319180-d83ac400-9aff-11eb-8b50-3e9a388b91c7.png)
 
@@ -49,6 +49,11 @@ clojure -Mnative -m demo.main
 ### Limitations
 
 - Notcurses API for setters often uses pointers to primitive types to set their value, which does not work in Java since it only supports passing primitive types by value. Therefore functions to set channels properties like `ncchannels_set_*` need to be reimplemented in Clojure or Java.
+- I didn't go through the whole API, some bindings might need additional tweaks to work.
+
+### Related
+
+See also the demo implemented in [Zig](https://github.com/dundalek/notcurses-zig-example).
 
 ### License
 
