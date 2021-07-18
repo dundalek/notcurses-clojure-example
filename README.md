@@ -49,3 +49,9 @@ clojure -Mnative -m demo.main
 ### Limitations
 
 - Notcurses API for setters often uses pointers to primitive types to set their value, which does not work in Java since it only supports passing primitive types by value. Therefore functions to set channels properties like `ncchannels_set_*` need to be reimplemented in Clojure or Java.
+
+### License
+
+Dual-licensed under MIT or the [Unlicense](https://unlicense.org/).
+
+Includes [Native Utils](https://github.com/adamheinrich/native-utils) licensed under MIT.
