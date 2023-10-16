@@ -22,4 +22,9 @@ stdenv.mkDerivation {
     readline
     zlib
   ];
+  shellHook = ''
+    # OpenJDK seems to crash more often than GraalVM
+    # JAVA_HOME points to graal, set JAVA_CMD to use graal with Clojure CLI
+    export JAVA_CMD="$JAVA_HOME/bin/java"
+  '';
 }

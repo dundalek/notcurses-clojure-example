@@ -10,3 +10,4 @@ deps/notcurses
 /*.iml
 .clj-kondo
 .nrepl-port
+/.project
