@@ -10,3 +10,5 @@ deps/notcurses
 /pom.xml
 .idea
 /*.iml
+.clj-kondo
+.nrepl-port

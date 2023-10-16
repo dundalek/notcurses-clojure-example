@@ -8,6 +8,7 @@ swig \
   -package com.dundalek.notcurses.swig \
   -Ideps/notcurses/include \
   -DSWIGWORDSIZE64 \
+  -DUSE_MULTIMEDIA=none -DUSE_QRCODEGEN=off -DUSE_PANDOC=off -DUSE_DOCTEST=off \
   -java src/swig/notcurses.i
 
 # Unsigned suffix is not needed

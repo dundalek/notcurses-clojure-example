@@ -86,9 +86,9 @@
                                   (/ diff duration))))))
 
 (defn- transition_rgb [start end duration diff]
-  (let [r (linear_transition (NC/channel_r start) (NC/channel_r end) duration diff)
-        g (linear_transition (NC/channel_g start) (NC/channel_g end) duration diff)
-        b (linear_transition (NC/channel_b start) (NC/channel_b end) duration diff)]
+  (let [r (linear_transition (NC/ncchannel_r start) (NC/ncchannel_r end) duration diff)
+        g (linear_transition (NC/ncchannel_g start) (NC/ncchannel_g end) duration diff)
+        b (linear_transition (NC/ncchannel_b start) (NC/ncchannel_b end) duration diff)]
     (ncchannel_set_rgb8_clipped 0 r g b)))
 
 (defn- transition_box [start_box end_box duration diff]
@@ -100,16 +100,16 @@
 (defn- make_boxes_start [_dimy dimx]
   (->> (range BOX_NUM)
        (mapv (fn [_]
-              (let [y -1
-                    x (quot dimx 2)]
-                [y x (+ y 2) (+ x 4)])))))
+               (let [y -1
+                     x (quot dimx 2)]
+                 [y x (+ y 2) (+ x 4)])))))
 
 (defn- make_boxes_bottom_out [dimy dimx]
   (->> (range BOX_NUM)
        (mapv (fn [_]
-              (let [y (+ dimy 4)
-                    x (quot dimx 2)]
-                [y x (+ y 2) (+ x 4)])))))
+               (let [y (+ dimy 4)
+                     x (quot dimx 2)]
+                 [y x (+ y 2) (+ x 4)])))))
 
 (defn- make_boxes_arranged [dimy dimx]
   (let [x0 2
@@ -142,14 +142,14 @@
         x0 (-> dimx (* 20) (quot 100))]
     (->> (range BOX_NUM)
          (mapv (fn [i]
-                (let [row (quot i 5)
-                      col (mod i 5)
-                      shifted (zero? (mod col 2))
-                      y (+ y0
-                           (* row (+ boxh (quot boxh 2)))
-                           (if shifted (+ (quot boxh 2) 1) 0))
-                      x (+ x0
-                           (* col (+ boxw 2)))]
+                 (let [row (quot i 5)
+                       col (mod i 5)
+                       shifted (zero? (mod col 2))
+                       y (+ y0
+                            (* row (+ boxh (quot boxh 2)))
+                            (if shifted (+ (quot boxh 2) 1) 0))
+                       x (+ x0
+                            (* col (+ boxw 2)))]
                    [y x (+ y boxh) (+ x boxw)]))))))
 
 (defn- box_ylen [box]
@@ -178,7 +178,7 @@
           ul (bit-or color NCConstants/NC_BGDEFAULT_MASK)
           lr (bit-or color NCConstants/NC_BGDEFAULT_MASK)
           ll (bit-or 0x000000 NCConstants/NC_BGDEFAULT_MASK)]
-      (nc-err (NC/ncplane_highgradient plane ul ur ll lr (dec (NC/ncplane_dim_y plane)) (dec (NC/ncplane_dim_x plane)))))))
+      (nc-err (NC/ncplane_gradient2x1 plane 0 0 (NC/ncplane_dim_y plane) (NC/ncplane_dim_x plane) ul ur ll lr)))))
 
 (defn- draw_boxes_bordered [planes]
   (doseq [plane planes]
@@ -233,11 +233,11 @@
   (let [time_start (System/nanoTime)]
     (loop []
       (let [t (System/nanoTime)]
-       (when (< t (+ time_start duration))
-        (render ctx (- t time_start) duration)
-        (nc-err (NC/notcurses_render ncs))
-        (sleep_until_ns (+ t step_ns))
-        (recur))))
+        (when (< t (+ time_start duration))
+          (render ctx (- t time_start) duration)
+          (nc-err (NC/notcurses_render ncs))
+          (sleep_until_ns (+ t step_ns))
+          (recur))))
     (render ctx duration duration)
     (nc-err (NC/notcurses_render ncs))))
 
@@ -253,8 +253,8 @@
                #_(.setLoglevel ncloglevel_e/NCLOGLEVEL_ERROR))
         ncs (NC/notcurses_core_init opts nil)
         plane (NC/notcurses_stdplane ncs)
-        dimx (Math/max (NC/ncplane_dim_x plane) (int 80))
-        dimy (Math/max (NC/ncplane_dim_y plane) (int 25))
+        dimx (max (NC/ncplane_dim_x plane) 80)
+        dimy (max (NC/ncplane_dim_y plane) 25)
         box_planes (make_box_planes plane BOX_NUM)
         boxes_start (make_boxes_start dimy dimx)
         ;;boxes_bottom_out (make_boxes_bottom_out dimy dimx)
@@ -267,51 +267,51 @@
     ;;(reposition_planes box_planes boxes_arranged)
 
     (run_serial_transition ncs 300e6
-      (fn render [i diff duration]
-        (reposition_plane (get box_planes i) (transition_box (get boxes_start i) (get boxes_grid i) duration diff))
-        (draw_boxes_bordered box_planes)))
+                           (fn render [i diff duration]
+                             (reposition_plane (get box_planes i) (transition_box (get boxes_start i) (get boxes_grid i) duration diff))
+                             (draw_boxes_bordered box_planes)))
 
     (run_transition ncs 1000e6 nil
-      (fn render [_ctx diff duration]
-        (dotimes [i BOX_NUM]
-          (reposition_plane (get box_planes i) (transition_box (get boxes_grid i) (get boxes_arranged i) duration diff))
-          (draw_boxes_bordered box_planes))))
+                    (fn render [_ctx diff duration]
+                      (dotimes [i BOX_NUM]
+                        (reposition_plane (get box_planes i) (transition_box (get boxes_grid i) (get boxes_arranged i) duration diff))
+                        (draw_boxes_bordered box_planes))))
 
     (run_serial_transition ncs 150e6
-      (fn render [i diff duration]
-        (let [plane (get box_planes i)
-              chans (-> 0
-                      (ncchannels_set_bchannel (transition_rgb 0x333333 0x000000 duration diff))
-                      (ncchannels_set_fchannel (transition_rgb 0xF2F2F2 0x000000 duration diff)))]
-          (nc-err (NC/ncplane_set_base plane " " 0 chans))
-          (draw_boxes_bordered box_planes))))
+                           (fn render [i diff duration]
+                             (let [plane (get box_planes i)
+                                   chans (-> 0
+                                             (ncchannels_set_bchannel (transition_rgb 0x333333 0x000000 duration diff))
+                                             (ncchannels_set_fchannel (transition_rgb 0xF2F2F2 0x000000 duration diff)))]
+                               (nc-err (NC/ncplane_set_base plane " " 0 chans))
+                               (draw_boxes_bordered box_planes))))
 
     (run_serial_transition ncs 150e6
-      (fn render [i diff duration]
-        (let [plane (get box_planes i)
-              chans (ncchannels_set_bchannel 0 (transition_rgb 0x000000 (get box_colors i) duration diff))]
-          (nc-err (NC/ncplane_set_base plane " " 0 chans))
-          (NC/ncplane_erase plane))))
+                           (fn render [i diff duration]
+                             (let [plane (get box_planes i)
+                                   chans (ncchannels_set_bchannel 0 (transition_rgb 0x000000 (get box_colors i) duration diff))]
+                               (nc-err (NC/ncplane_set_base plane " " 0 chans))
+                               (NC/ncplane_erase plane))))
 
     (run_serial_transition ncs 150e6
-      (fn render [i diff duration]
-        (let [plane (get box_planes i)
-              ur (bit-or (transition_rgb (get box_colors i) 0xffffff duration diff) NCConstants/NC_BGDEFAULT_MASK)
-              ul (bit-or (get box_colors i) NCConstants/NC_BGDEFAULT_MASK)
-              lr (bit-or (get box_colors i) NCConstants/NC_BGDEFAULT_MASK)
-              ll (bit-or (transition_rgb (get box_colors i) 0x000000 duration diff) NCConstants/NC_BGDEFAULT_MASK)]
-          (nc-err (NC/ncplane_highgradient plane ul ur ll lr (dec (NC/ncplane_dim_y plane)) (dec (NC/ncplane_dim_x plane)))))))
+                           (fn render [i diff duration]
+                             (let [plane (get box_planes i)
+                                   ur (bit-or (transition_rgb (get box_colors i) 0xffffff duration diff) NCConstants/NC_BGDEFAULT_MASK)
+                                   ul (bit-or (get box_colors i) NCConstants/NC_BGDEFAULT_MASK)
+                                   lr (bit-or (get box_colors i) NCConstants/NC_BGDEFAULT_MASK)
+                                   ll (bit-or (transition_rgb (get box_colors i) 0x000000 duration diff) NCConstants/NC_BGDEFAULT_MASK)]
+                               (nc-err (NC/ncplane_gradient2x1 plane 0 0 (NC/ncplane_dim_y plane) (NC/ncplane_dim_x plane) ul ur ll lr)))))
 
     (let [message_box (make_message_box plane dimy dimx)]
       (run_transition ncs 300e6 {:from (- (NC/ncplane_dim_x message_box))
                                  :to (NC/ncplane_x message_box)}
-        (fn render [{:keys [from to]} diff duration]
-          (let [x (linear_transition from to duration diff)]
-            (nc-err (NC/ncplane_move_yx message_box (NC/ncplane_y message_box) x))))))
+                      (fn render [{:keys [from to]} diff duration]
+                        (let [x (linear_transition from to duration diff)]
+                          (nc-err (NC/ncplane_move_yx message_box (NC/ncplane_y message_box) x))))))
 
     ;;(draw_boxes_gradients box_planes)
     ;;(nc-err (NC/notcurses_render ncs))
-    ;;(NC/notcurses_getc_blocking ncs nil)
+    ;;(NC/notcurses_get_blocking ncs nil)
     ;;(Thread/sleep 1000)
 
     (let [duration 1000e6]
@@ -330,17 +330,19 @@
                                                          (get colors (mod (+ j iter 1) 4))
                                                          duration
                                                          (- t time_start)))))]
-              (nc-err (NC/ncplane_highgradient plane
-                                               (get corners 0)
-                                               (get corners 1)
-                                               (get corners 3)
-                                               (get corners 2)
-                                               (dec (NC/ncplane_dim_y plane))
-                                               (dec (NC/ncplane_dim_x plane))))
+              (nc-err (NC/ncplane_gradient2x1 plane
+                                              0
+                                              0
+                                              (NC/ncplane_dim_y plane)
+                                              (NC/ncplane_dim_x plane)
+                                              (get corners 0)
+                                              (get corners 1)
+                                              (get corners 3)
+                                              (get corners 2)))
               (nc-err (NC/notcurses_render ncs))
               (sleep_until_ns (+ t step_ns))))
 
-          (let [keypress (NC/notcurses_getc_nblock ncs nil)]
+          (let [keypress (NC/notcurses_get_nblock ncs nil)]
             (when (not= keypress (int \q))
               (if (< t (+ time_start duration))
                 (recur iter time_start)

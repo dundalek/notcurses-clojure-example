@@ -5,4 +5,6 @@ if [ -z "$JAVA_HOME" ]; then
     exit 1
 fi
 
-zig build notcurses-jni -Drelease-safe
+zig build -Doptimize=ReleaseSafe
+mkdir -p target/native
+cp zig-out/lib/* target/native

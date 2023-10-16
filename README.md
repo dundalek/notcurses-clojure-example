@@ -23,9 +23,9 @@ Since packaged versions of Notcurses are often outdated, we pull and build it fr
 ```sh
 git clone https://github.com/dankamongmen/notcurses.git deps/notcurses
 cd deps/notcurses
-git checkout v2.3.10  # latest release at the time of writing
+git checkout v3.0.9 # latest release at the time of writing
 mkdir build && cd build
-cmake -DUSE_MULTIMEDIA=none -DUSE_PANDOC=OFF -DUSE_DOCTEST=OFF ..
+cmake -DUSE_MULTIMEDIA=none -DUSE_QRCODEGEN=off -DUSE_PANDOC=off -DUSE_DOCTEST=off ..
 # We just need `cmake` to generate some headers, no need to actually `make` since rest will be handled by Zig.
 ```
 

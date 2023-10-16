@@ -1,4 +1,4 @@
-with import <nixpkgs> {};
+with import <nixpkgs> { };
 stdenv.mkDerivation {
   name = "notcurses-env";
   buildInputs = [
@@ -6,7 +6,7 @@ stdenv.mkDerivation {
     clojure
     git
     gnused
-    graalvm11-ce
+    graalvm-ce
     zig
     swig4
     which
@@ -15,10 +15,11 @@ stdenv.mkDerivation {
     cmake
     pkg-config
     # notcurses lib dependencies
+    libdeflate
     libunistring
     ncurses
     qrcodegen
-    readline81
+    readline
     zlib
   ];
 }
