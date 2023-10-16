@@ -2,6 +2,8 @@
 
 OUTDIR="src/java/com/dundalek/notcurses/swig"
 
+rm -rf src/java/com/dundalek/notcurses/swig/*.java src/swig/notcurses_wrap.c
+
 swig \
   -outdir "$OUTDIR" \
   -o src/swig/notcurses_wrap.c \

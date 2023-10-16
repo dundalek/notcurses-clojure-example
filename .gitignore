@@ -5,8 +5,6 @@ deps/notcurses
 /target
 .cpcache
 .lsp
-/src/swig/notcurses_wrap.c
-/src/java/com/dundalek/notcurses/swig/*.java
 /pom.xml
 .idea
 /*.iml
